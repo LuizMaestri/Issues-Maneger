@@ -4,10 +4,10 @@ package model.enums;
  * Created by luiz on 01/10/15.
  */
 public enum Status {
-    ESPERA,
+    EM_ABERTO,
     APROVADA,
-    INICIADA,
-    FINALIZADA,
+    EM_ANDAMENTO,
+    EMCERRADA,
     CANCELADA
     /**
      * BACKLOG
