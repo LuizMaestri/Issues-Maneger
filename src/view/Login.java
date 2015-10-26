@@ -22,7 +22,7 @@ public class Login extends JPanel {
 		
 		JLabel lblDescricaoSistema =
 				new JLabel(
-                        "<html> \r\nBem vindo ao programa\r\n<br>\r\n(Descri\u00E7\u00E3o do sistema)\r\n</html>",
+                        "<html> \r\nBem vindo ao programa\r\n<br>\r\n(Descrição do sistema)\r\n</html>",
                         SwingConstants.CENTER
                 );
         lblDescricaoSistema.setBorder(

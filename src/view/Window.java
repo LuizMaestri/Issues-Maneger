@@ -21,9 +21,8 @@ public class Window extends JFrame {
                 .addActionListener(arg0 -> new About(new JFrame()));
 		setJMenuBar(menuBar);
 
-		panel = new JPanel();
-		panel.setLayout(null);
-		this.getContentPane().add(panel);
+		panel = new JPanel(null, true);
+		this.getContentPane().add(new JPanel(null, true));
 	}
 
 	public JPanel getPanel() {
