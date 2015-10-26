@@ -54,7 +54,7 @@ public class Login extends JPanel {
                                         passwordField.getPassword()
                                 )
                         )
-                        ) UIManager.setPanel(new PanelSistema());
+                        ) UIManager.setPanel(new SystemPanel());
             } catch (AuthenticationUserException | ConnectionException e1) {
                 JOptionPane.showMessageDialog(null, e1.getMessage());
             }
