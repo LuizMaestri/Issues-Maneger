@@ -1,0 +1,6 @@
+<DBConnect>
+    <host>localhost:5432</host>
+    <user>luiz</user>
+    <pass>r1c4rd0*</pass>
+    <base>APS</base>
+</DBConnect>
