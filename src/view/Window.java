@@ -18,11 +18,11 @@ public class Window extends JFrame {
 
 		menuBar.add(new JMenu("Ajuda"))
                 .add(new JMenuItem("Sobre"))
-                .addActionListener(arg0 -> new About(new JFrame()));
+                .addActionListener(arg0 -> new About(this));
 		setJMenuBar(menuBar);
 
 		panel = new JPanel(null, true);
-		this.getContentPane().add(new JPanel(null, true));
+		this.getContentPane().add(panel);
 	}
 
 	public JPanel getPanel() {

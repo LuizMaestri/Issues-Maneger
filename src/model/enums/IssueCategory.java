@@ -1,6 +1,6 @@
 package model.enums;
 
-public enum Category {
+public enum IssueCategory {
     CORRECAO,
     MELHORIA,
     NOVA_FUNCINALIDADE

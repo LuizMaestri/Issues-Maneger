@@ -3,7 +3,7 @@ package model.enums;
 /**
  * Created by luiz on 01/10/15.
  */
-public enum Status {
+public enum IssueStatus {
     EM_ABERTO,
     APROVADA,
     EM_ANDAMENTO,

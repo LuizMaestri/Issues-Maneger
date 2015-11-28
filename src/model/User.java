@@ -1,11 +1,12 @@
 package model;
 
+import model.enums.UserType;
+
 public class User {
     private String login;
     private String pass;
     private String name;
-    private boolean approve;
-    private boolean admin;
+    private UserType type;
 
     public User() {
     }
@@ -34,19 +35,11 @@ public class User {
         this.name = name;
     }
 
-    public boolean isApprove() {
-        return approve;
+    public UserType getType() {
+        return type;
     }
 
-    public void setApprove(boolean approve) {
-        this.approve = approve;
-    }
-
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public void setType(UserType type) {
+        this.type = type;
     }
 }

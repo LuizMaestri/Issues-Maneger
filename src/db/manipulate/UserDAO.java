@@ -2,6 +2,7 @@ package db.manipulate;
 
 import exception.AuthenticationUserException;
 import model.User;
+import model.enums.UserType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,14 +14,13 @@ public class UserDAO{
             throws SQLException {
         String sql =
                 "INSERT INTO users " +
-                "VALUES (?, md5(?), ?, ?, ?) " +
+                "VALUES (?, md5(?), ?, ?) " +
                 "RETURNING nm_login;";
         PreparedStatement stmt = connect.prepareStatement(sql);
         stmt.setString(1, newUser.getLogin());
         stmt.setString(2, newUser.getPass());
         stmt.setString(3, newUser.getName());
-        stmt.setBoolean(4, newUser.isApprove());
-        stmt.setBoolean(5, newUser.isAdmin());
+        stmt.setInt(4, newUser.getType().ordinal());
         try {
             stmt.executeQuery();
             stmt.close();
@@ -38,18 +38,18 @@ public class UserDAO{
             throws SQLException{
         String sql =
                 "UPDATE users " +
-                "SET nm_login=?, nm_pass=md5(?), nm_user=?, fl_approve=?, fl_admin=? " +
+                "SET nm_login=?, nm_pass=md5(?), nm_user=?, fl_user=? " +
                 "WHERE nm_login=? " +
                 "RETURNING nm_login;";
         PreparedStatement stmt = connect.prepareStatement(sql);
         stmt.setString(1, toUpdate.getLogin());
         stmt.setString(2, toUpdate.getPass());
         stmt.setString(3, toUpdate.getName());
-        stmt.setBoolean(4, toUpdate.isApprove());
-        stmt.setBoolean(5, toUpdate.isAdmin());
-        stmt.setString(6, toUpdate.getLogin());
+        stmt.setInt(4, toUpdate.getType().ordinal());
+        stmt.setString(5, toUpdate.getLogin());
         ResultSet result = stmt.executeQuery();
         boolean updated = result.next();
+        result.close();
         stmt.close();
         connect.commit();
         connect.close();
@@ -91,9 +91,11 @@ public class UserDAO{
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 authUser.setName(result.getString("nm_user"));
-                authUser.setAdmin(result.getBoolean("fl_admin"));
-                authUser.setApprove(result.getBoolean("fl_approve"));
+                authUser.setType(UserType.getType(result.getInt("fl_user")));
             }
+            result.close();
+            stmt.close();
+            connect.close();
             if(authUser.getName() != null) return authUser;
             throw new AuthenticationUserException("Login/senha errado(s)");
         }catch (SQLException e){

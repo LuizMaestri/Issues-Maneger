@@ -1,7 +1,7 @@
 package model;
 
-import model.enums.Category;
-import model.enums.Status;
+import model.enums.IssueCategory;
+import model.enums.IssueStatus;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -10,17 +10,19 @@ public class Issue {
     private long uuid;
     private String name;
     private String description;
-    private Status status;
+    private IssueStatus issueStatus;
+    private Date create;
     private Date start;
     private Date deadline;
     private Date over;
     private User requester;
     private User approving;
     private User maker;
-    private Category type;
+    private IssueCategory category;
+    private Software software;
 
-    public Issue(User requester) {
-        setRequester(requester);
+    public Issue() {
+
     }
 
     public long getUuid() {
@@ -47,12 +49,20 @@ public class Issue {
         this.description = description;
     }
 
-    public Status getStatus() {
-        return status;
+    public IssueStatus getIssueStatus() {
+        return issueStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setIssueStatus(IssueStatus issueStatus) {
+        this.issueStatus = issueStatus;
+    }
+
+    public Date getCreate() {
+        return create;
+    }
+
+    public void setCreate(Date create) {
+        this.create = create;
     }
 
     public Date getStart() {
@@ -103,12 +113,20 @@ public class Issue {
         this.maker = maker;
     }
 
-    public Category getType() {
-        return type;
+    public IssueCategory getCategory() {
+        return category;
     }
 
-    public void setType(Category type) {
-        this.type = type;
+    public void setCategory(IssueCategory category) {
+        this.category = category;
+    }
+
+    public Software getSoftware() {
+        return software;
+    }
+
+    public void setSoftware(Software software) {
+        this.software = software;
     }
 
     public boolean overdue(){
@@ -120,14 +138,14 @@ public class Issue {
         info += uuid + " | ";
         info += name + " | ";
         info += description + " | ";
-        info += status != null? status.name() + " | " : " | ";
+        info += issueStatus != null? issueStatus.name() + " | " : " | ";
         info += start != null? DateFormat.getDateTimeInstance().format(start) + " | " : " | ";
         info += deadline != null? DateFormat.getDateTimeInstance().format(deadline) + " | " : " | ";
         info += over != null? DateFormat.getDateTimeInstance().format(over) +" | " : " | ";
         info += requester.getName() + " | ";
         info += approving!=null? approving.getName() + " | " : " | ";
         info += maker!=null? maker.getName() + " | " : " | ";
-        info += type.name().replace('_', ' ');
+        info += category.name().replace('_', ' ');
         return info;
     }
 }

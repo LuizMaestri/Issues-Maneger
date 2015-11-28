@@ -20,7 +20,7 @@ public class UIManager {
         String iconPath = "resources" + File.separator + "icone.png";
 		LookAndFeel.aparenciaNimbus();
         prog = new Window();
-        setPanel(new Login(new Manager()));
+        setPanel(new Login());
         prog.setTitle(title);
 		prog.pack();
 		prog.setIconImage(new ImageIcon(iconPath).getImage());
@@ -41,6 +41,6 @@ public class UIManager {
 	}
 
 	public static void run() {
-        open("Sistema de Gest�o de Mudan\u00E7as");
+        open("Sistema de Gestão de Mudanças");
 	}
 }
