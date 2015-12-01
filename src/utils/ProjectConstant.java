@@ -1,6 +1,7 @@
 package utils;
 
 import controller.Manager;
+import db.DBConnection;
 
 import java.awt.*;
 
@@ -10,10 +11,12 @@ import java.awt.*;
 public class ProjectConstant {
     private static Manager manager;
     private static Font font;
+    private static DBConnection connector;
 
     static {
         manager = new Manager();
         font = new Font("Tahoma", Font.PLAIN, 12);
+        connector = Config.getDBConfig();
     }
 
     public static Manager getManager() {
@@ -22,5 +25,9 @@ public class ProjectConstant {
 
     public static Font getFont() {
         return font;
+    }
+
+    public static DBConnection getConnector() {
+        return connector;
     }
 }

@@ -19,12 +19,7 @@ public class UserDAOTest extends TestCase {
         testUser.setName("admin");
 
         try {
-            assertFalse(
-                    UserDAO.create(
-                            testUser,
-                            Config.getDBConfig().getConnect()
-                    )
-            );
+            assertNull(UserDAO.create(testUser));
         } catch (ClassNotFoundException | SQLException e) {
             fail(e.getMessage());
         }
@@ -38,12 +33,7 @@ public class UserDAOTest extends TestCase {
         testUser.setName("Luiz Maestri");
 
         try {
-            assertTrue(
-                    UserDAO.create(
-                            testUser,
-                            Config.getDBConfig().getConnect()
-                    )
-            );
+            assertNotNull(UserDAO.create(testUser));
         } catch (ClassNotFoundException | SQLException e) {
             fail(e.getMessage());
         }
@@ -52,10 +42,7 @@ public class UserDAOTest extends TestCase {
 
     public void testAuthFail() {
         try {
-            UserDAO.auth(
-                    new User(),
-                    Config.getDBConfig().getConnect()
-            );
+            UserDAO.auth(new User());
         } catch (ClassNotFoundException | SQLException | AuthenticationUserException e) {
             assertSame(AuthenticationUserException.class, e.getClass());
         }
@@ -66,12 +53,7 @@ public class UserDAOTest extends TestCase {
         testUser.setLogin("admin");
         testUser.setPass("admin");
         try {
-            assertNotNull(
-                    UserDAO.auth(
-                            testUser,
-                            Config.getDBConfig().getConnect()
-                    )
-            );
+            assertNotNull(UserDAO.auth(testUser));
         } catch (ClassNotFoundException | SQLException | AuthenticationUserException e) {
             fail(e.getMessage());
         }
@@ -83,12 +65,7 @@ public class UserDAOTest extends TestCase {
         testUser.setPass("1234");
         testUser.setName("Luiz Ricardo Maestri");
         try {
-            assertTrue(
-                    UserDAO.update(
-                            testUser,
-                            Config.getDBConfig().getConnect()
-                    )
-            );
+            assertNotNull(UserDAO.update(testUser, "luiz"));
         } catch (SQLException | ClassNotFoundException e) {
             fail(e.getMessage());
         }
@@ -96,12 +73,7 @@ public class UserDAOTest extends TestCase {
 
     public void testDelete() {
         try {
-            assertTrue(
-                    UserDAO.delete(
-                            "luiz",
-                            Config.getDBConfig().getConnect()
-                    )
-            );
+            assertTrue(UserDAO.delete("luiz"));
         } catch (SQLException | ClassNotFoundException e) {
             fail(e.getMessage());
         }

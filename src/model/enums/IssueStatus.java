@@ -8,7 +8,7 @@ public enum IssueStatus {
     APROVADA,
     EM_ANDAMENTO,
     EMCERRADA,
-    CANCELADA
+    CANCELADA;
     /**
      * BACKLOG
      * APPROVED
@@ -16,4 +16,9 @@ public enum IssueStatus {
      * FINISHED
      * CANCELED
      **/
+
+    public static IssueStatus getStatus(int status){
+        for (IssueStatus value: values()) if (value.ordinal()==status) return value;
+        return getStatus(0);
+    }
 }

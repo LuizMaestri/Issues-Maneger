@@ -4,13 +4,14 @@ import model.enums.IssueCategory;
 import model.enums.IssueStatus;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Issue {
     private long uuid;
     private String name;
     private String description;
-    private IssueStatus issueStatus;
+    private IssueStatus status;
     private Date create;
     private Date start;
     private Date deadline;
@@ -19,6 +20,7 @@ public class Issue {
     private User approving;
     private User maker;
     private IssueCategory category;
+    private ArrayList<Comment> comments;
     private Software software;
 
     public Issue() {
@@ -49,12 +51,12 @@ public class Issue {
         this.description = description;
     }
 
-    public IssueStatus getIssueStatus() {
-        return issueStatus;
+    public IssueStatus getStatus() {
+        return status;
     }
 
-    public void setIssueStatus(IssueStatus issueStatus) {
-        this.issueStatus = issueStatus;
+    public void setStatus(IssueStatus status) {
+        this.status = status;
     }
 
     public Date getCreate() {
@@ -121,6 +123,14 @@ public class Issue {
         this.category = category;
     }
 
+    public ArrayList<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<Comment> comments) {
+        this.comments = comments;
+    }
+
     public Software getSoftware() {
         return software;
     }
@@ -130,22 +140,18 @@ public class Issue {
     }
 
     public boolean overdue(){
-        return over == null && deadline != null && new Date().after(deadline);
+        return over == null && new Date().after(deadline);
     }
 
     public String toString(){
         String info = "";
-        info += uuid + " | ";
         info += name + " | ";
-        info += description + " | ";
-        info += issueStatus != null? issueStatus.name() + " | " : " | ";
-        info += start != null? DateFormat.getDateTimeInstance().format(start) + " | " : " | ";
-        info += deadline != null? DateFormat.getDateTimeInstance().format(deadline) + " | " : " | ";
-        info += over != null? DateFormat.getDateTimeInstance().format(over) +" | " : " | ";
-        info += requester.getName() + " | ";
-        info += approving!=null? approving.getName() + " | " : " | ";
+        info += status != null? status.name() + " | " : " | ";
+        info += DateFormat.getDateTimeInstance().format(create) + " | ";
+        info += approving!=null? approving.getName() + " | " : "ESPERANDO APROVAÇÃO | ";
+        info += software.getName() + " | ";
         info += maker!=null? maker.getName() + " | " : " | ";
-        info += category.name().replace('_', ' ');
+        info += overdue()? "ATRASADO" : DateFormat.getDateTimeInstance().format(deadline);
         return info;
     }
 }

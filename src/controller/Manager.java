@@ -1,14 +1,14 @@
 package controller;
 
-import db.DBConnection;
 import db.manipulate.IssueDAO;
+import db.manipulate.SoftwareDAO;
 import db.manipulate.UserDAO;
 import exception.AuthenticationUserException;
 import exception.ConnectionException;
 import model.Issue;
+import model.Software;
 import model.User;
 import model.enums.IssueCategory;
-import utils.Config;
 import utils.ProjectConstant;
 
 import java.sql.SQLException;
@@ -17,17 +17,12 @@ import java.util.Date;
 
 public class Manager {
 
-    private DBConnection connector;
     private User currentUser;
     private ArrayList<Issue> issues;
+    private ArrayList<Software> softwares;
 
     public Manager() {
         setCurrentUser(new User());
-        setConnector(Config.getDBConfig());
-    }
-
-    public void setConnector(DBConnection connector) {
-        this.connector = connector;
     }
 
     public User getCurrentUser() {
@@ -46,9 +41,18 @@ public class Manager {
         this.issues = issues;
     }
 
+    public ArrayList<Software> getSoftwares() {
+        return softwares;
+    }
+
+    public void setSoftwares(ArrayList<Software> softwares) {
+        this.softwares = softwares;
+    }
+
     public void reset() {
         this.setCurrentUser(new User());
         this.setIssues(null);
+        this.setSoftwares(null);
     }
 
     public boolean login(String user, String pass)
@@ -56,8 +60,13 @@ public class Manager {
         this.currentUser.setLogin(user);
         this.currentUser.setPass(pass);
         try {
-            setCurrentUser(UserDAO.auth(this.currentUser, this.connector.getConnect()));
-            if (this.currentUser != null) return true;
+            setCurrentUser(UserDAO.auth(this.currentUser));
+            if (this.currentUser != null){
+                this.setSoftwares(SoftwareDAO.list());
+                if (!this.currentUser.isAdmin()) this.setIssues(IssueDAO.list(this.currentUser));
+                else this.setIssues(IssueDAO.list());
+                return true;
+            }
             this.currentUser = new User();
             return false;
         } catch (SQLException | ClassNotFoundException e) {
@@ -74,8 +83,21 @@ public class Manager {
         newIssue.setCategory(category);
         newIssue.setDeadline(deadline);
         try {
-            return issues.add(IssueDAO.create(newIssue, this.connector.getConnect()));
+            return issues.add(IssueDAO.create(newIssue));
         } catch (SQLException | ClassNotFoundException e){
+            return false;
+        }
+    }
+
+    public boolean createSoftware(String name, String[] versions) {
+        Software newSoftware = new Software();
+        newSoftware.setName(name);
+        newSoftware.setReleaseVersion(Integer.parseInt(versions[0]));
+        newSoftware.setMinorVersion(Integer.parseInt(versions[1]));
+        newSoftware.setFixVersion(Integer.parseInt(versions[2]));
+        try {
+            return softwares.add(SoftwareDAO.create(newSoftware));
+        } catch (SQLException | ClassNotFoundException e) {
             return false;
         }
     }

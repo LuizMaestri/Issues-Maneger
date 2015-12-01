@@ -10,6 +10,7 @@ public class Software {
     private int releaseVersion;
     private int minorVersion;
     private int fixVersion;
+    private boolean deprecate;
 
     public Software() {
     }
@@ -54,6 +55,14 @@ public class Software {
         this.fixVersion = fixVersion;
     }
 
+    public boolean isDeprecate() {
+        return deprecate;
+    }
+
+    public void setDeprecate(boolean deprecate) {
+        this.deprecate = deprecate;
+    }
+
     public void newRelease(){
         releaseVersion =+ 1;
     }
@@ -64,6 +73,10 @@ public class Software {
 
     public void newFix(){
         fixVersion += 1;
+    }
+
+    public String toString(){
+        return uuid + " | " + name + " | " + releaseVersion + "." + minorVersion + "." + fixVersion;
     }
 
 }

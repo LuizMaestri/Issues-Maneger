@@ -42,4 +42,20 @@ public class User {
     public void setType(UserType type) {
         this.type = type;
     }
+
+    public boolean isApproving(){
+        return type == UserType.getType(1);
+    }
+
+    public boolean isAdmin(){
+        return type == UserType.ADMIN;
+    }
+
+    public boolean isDeveloper(){
+        return type == UserType.getType(0);
+    }
+
+    public boolean isAnalyst(){
+        return type == UserType.getType(2);
+    }
 }

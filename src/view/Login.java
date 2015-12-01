@@ -13,11 +13,8 @@ import javax.swing.border.TitledBorder;
 public class Login extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField loginField;
-	private JPasswordField passwordField;
 
 	public Login() {
-
 		setLayout(null);
 
 		JLabel description =
@@ -38,10 +35,10 @@ public class Login extends JPanel {
 		password.setFont(ProjectConstant.getFont());
         add(password).setBounds(535, 248, 78, 26);
 
-		loginField = new JTextField(20);
+        JTextField loginField = new JTextField(20);
         add(loginField).setBounds(614, 219, 222, 27);
 
-		passwordField = new JPasswordField();
+        JPasswordField passwordField = new JPasswordField();
         add(passwordField).setBounds(614, 249, 222, 27);
 
         JButton enter = new JButton("Entrar");

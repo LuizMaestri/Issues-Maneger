@@ -1,47 +1,54 @@
 package db.manipulate;
 
 import model.Software;
+import utils.ProjectConstant;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by luiz on 25/11/15.
  */
 public class SoftwareDAO {
-    public static boolean create(Software newSoftware, Connection connect)
-            throws SQLException {
+    public static Software create(Software newSoftware)
+            throws SQLException, ClassNotFoundException {
         String sql =
                 "INSERT INTO software " +
-                "(nm_software, cd_release, cd_minor, cd_fix) " +
+                "(nm_software, nu_release, nu_minor, nu_fix) " +
                 "VALUES (?, ?, ?, ?)" +
                 "RETURNING cd_software;";
+        Connection connect = ProjectConstant.getConnector().getConnect();
         PreparedStatement stmt = connect.prepareStatement(sql);
         stmt.setString(1, newSoftware.getName());
         stmt.setInt(2, newSoftware.getReleaseVersion());
         stmt.setInt(3, newSoftware.getMinorVersion());
         stmt.setInt(4, newSoftware.getFixVersion());
         try {
-            stmt.executeQuery();
+            ResultSet result = stmt.executeQuery();
+            if(result.next()) newSoftware.setUuid(result.getLong("cd_software"));
+            result.close();
             stmt.close();
             connect.commit();
             connect.close();
-            return true;
+            return newSoftware;
         } catch (SQLException e){
             stmt.close();
             connect.close();
-            return false;
+            return null;
         }
     }
 
-    public static boolean update(Software toUpdate, Connection connect) throws SQLException {
+    public static Software update(Software toUpdate)
+            throws SQLException, ClassNotFoundException {
         String sql =
                 "UPDATE software " +
-                "SET nm_software=?, cd_release=?, cd_minor=?, cd_fix=?" +
+                "SET nm_software=?, nu_release=?, nu_minor=?, nu_fix=? " +
                 "WHERE cd_software=?" +
                 "RETURNING cd_software;";
+        Connection connect = ProjectConstant.getConnector().getConnect();
         PreparedStatement stmt = connect.prepareStatement(sql);
         stmt.setString(1, toUpdate.getName());
         stmt.setInt(2, toUpdate.getReleaseVersion());
@@ -54,15 +61,16 @@ public class SoftwareDAO {
         stmt.close();
         connect.commit();
         connect.close();
-        return updated;
+        return updated? toUpdate : null;
     }
 
-    public static Software search(long id, Connection connect)
-            throws SQLException {
+    public static Software search(long id)
+            throws SQLException, ClassNotFoundException {
         Software software = null;
         String sql =
                 "SELECT * FROM software " +
                 "WHERE cd_software=?;";
+        Connection connect = ProjectConstant.getConnector().getConnect();
         PreparedStatement stmt = connect.prepareStatement(sql);
         stmt.setLong(1, id);
         ResultSet result = stmt.executeQuery();
@@ -70,9 +78,10 @@ public class SoftwareDAO {
             software = new Software();
             software.setUuid(id);
             software.setName(result.getString("nm_software"));
-            software.setReleaseVersion(result.getInt("cd_release"));
-            software.setMinorVersion(result.getInt("cd_minor"));
-            software.setFixVersion(result.getInt("cd_fix"));
+            software.setReleaseVersion(result.getInt("nu_release"));
+            software.setMinorVersion(result.getInt("nu_minor"));
+            software.setFixVersion(result.getInt("nu_fix"));
+            software.setDeprecate(result.getBoolean("fl_deprecate"));
         }
         result.close();
         stmt.close();
@@ -80,11 +89,31 @@ public class SoftwareDAO {
         return software;
     }
 
-    public static boolean deprecate(long id, Connection connect) throws SQLException {
+    public static ArrayList<Software> list()
+            throws SQLException, ClassNotFoundException {
+        ArrayList<Software> softwares = new ArrayList<>();
+        Connection connect = ProjectConstant.getConnector().getConnect();
+        PreparedStatement stmt = connect.prepareStatement("SELECT * FROM software WHERE fl_deprecate=FALSE;");
+        ResultSet result = stmt.executeQuery();
+        while (result.next()){
+            Software software = new Software();
+            software.setUuid(result.getLong("cd_software"));
+            software.setName(result.getString("nm_software"));
+            software.setReleaseVersion(result.getInt("nu_release"));
+            software.setMinorVersion(result.getInt("nu_minor"));
+            software.setFixVersion(result.getInt("nu_fix"));
+            software.setDeprecate(false);
+            softwares.add(software);
+        }
+        return softwares;
+    }
+
+    public static boolean deprecate(long id) throws SQLException, ClassNotFoundException {
         String sql =
                 "UPDATE software " +
                 "SET fl_deprecate=true " +
                 "WHERE cd_software=?;";
+        Connection connect = ProjectConstant.getConnector().getConnect();
         PreparedStatement stmt = connect.prepareStatement(sql);
         stmt.setLong(1, id);
         boolean updated = stmt.executeUpdate() != 0;
