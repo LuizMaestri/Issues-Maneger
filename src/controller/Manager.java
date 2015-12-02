@@ -5,10 +5,13 @@ import db.manipulate.SoftwareDAO;
 import db.manipulate.UserDAO;
 import exception.AuthenticationUserException;
 import exception.ConnectionException;
+import exception.InvalidParamsException;
+import exception.PasswordException;
 import model.Issue;
 import model.Software;
 import model.User;
 import model.enums.IssueCategory;
+import model.enums.UserType;
 import utils.ProjectConstant;
 
 import java.sql.SQLException;
@@ -63,7 +66,8 @@ public class Manager {
             setCurrentUser(UserDAO.auth(this.currentUser));
             if (this.currentUser != null){
                 this.setSoftwares(SoftwareDAO.list());
-                if (!this.currentUser.isAdmin()) this.setIssues(IssueDAO.list(this.currentUser));
+                if (!this.currentUser.isAdmin() && !this.currentUser.isApproving())
+                    this.setIssues(IssueDAO.list(this.currentUser));
                 else this.setIssues(IssueDAO.list());
                 return true;
             }
@@ -75,15 +79,16 @@ public class Manager {
         }
     }
 
-    public boolean createIssue(String name, String description, IssueCategory category, Date deadline) {
+    public boolean createIssue(String name, String description, IssueCategory category, Date deadline, int index) {
         Issue newIssue = new Issue();
         newIssue.setRequester(ProjectConstant.getManager().getCurrentUser());
         newIssue.setName(name);
         newIssue.setDescription(description);
         newIssue.setCategory(category);
         newIssue.setDeadline(deadline);
+        newIssue.setSoftware(this.softwares.get(index));
         try {
-            return issues.add(IssueDAO.create(newIssue));
+            return this.issues.add(IssueDAO.create(newIssue));
         } catch (SQLException | ClassNotFoundException e){
             return false;
         }
@@ -100,5 +105,19 @@ public class Manager {
         } catch (SQLException | ClassNotFoundException e) {
             return false;
         }
+    }
+
+    public boolean createUser(String login, String name, String password, String passwordConfirm, UserType type)
+            throws PasswordException, SQLException, ClassNotFoundException, InvalidParamsException {
+        if (login == null || name == null || password == null || passwordConfirm == null)
+            throw new InvalidParamsException("Preencha todos os campos");
+        if (!password.equals(passwordConfirm))
+            throw new PasswordException("As senhas devem ser iguais");
+        User user = new User();
+        user.setLogin(login);
+        user.setName(name);
+        user.setPass(password);
+        user.setType(type);
+        return UserDAO.create(user) != null;
     }
 }

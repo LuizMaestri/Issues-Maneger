@@ -147,11 +147,11 @@ public class Issue {
         String info = "";
         info += name + " | ";
         info += status != null? status.name() + " | " : " | ";
-        info += DateFormat.getDateTimeInstance().format(create) + " | ";
+        info += DateFormat.getDateTimeInstance().format(create).split(" ")[0] + " | ";
         info += approving!=null? approving.getName() + " | " : "ESPERANDO APROVAÇÃO | ";
         info += software.getName() + " | ";
         info += maker!=null? maker.getName() + " | " : " | ";
-        info += overdue()? "ATRASADO" : DateFormat.getDateTimeInstance().format(deadline);
+        info += overdue()? "ATRASADO" : DateFormat.getDateTimeInstance().format(deadline).split(" ")[0];
         return info;
     }
 }
