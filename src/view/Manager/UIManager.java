@@ -1,8 +1,7 @@
 package view.Manager;
 
-import controller.Manager;
 import view.Window;
-import view.Login;
+import view.Panels.Login;
 
 import java.awt.Component;
 import java.io.File;

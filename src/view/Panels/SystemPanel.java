@@ -1,6 +1,8 @@
-package view;
+package view.Panels;
 
 import db.manipulate.IssueDAO;
+import exception.InvalidParamsException;
+import exception.PasswordException;
 import model.Issue;
 import model.Software;
 import model.User;
@@ -8,10 +10,13 @@ import model.enums.IssueCategory;
 import model.enums.UserType;
 import utils.ProjectConstant;
 import view.Manager.UIManager;
+import view.dialogs.ApproveDialog;
+import view.dialogs.DetailsDialog;
 
-import java.awt.Font;
+import java.awt.*;
 import java.sql.SQLException;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -22,10 +27,7 @@ public class SystemPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private JTabbedPane tabbedPane;
-    private JTable issueTable;
     private JTable softwareTable;
-    private JTable softwareSelectTable;
-
     public SystemPanel() {
 
         setLayout(null);
@@ -68,70 +70,47 @@ public class SystemPanel extends JPanel {
         title.setFont(new Font("Tahoma", Font.PLAIN, 20));
         issues.add(title).setBounds(0, 11, 995, 23);
 
-        String[] columns = {
-                "Nome",
-                "Status",
-                "Data de Criação",
-                "Aprovador",
-                "Software",
-                "Desenvolvedor",
-                "Prazo"
-        };
-        List<Issue> issueList = ProjectConstant.getManager().getIssues();
+
+        ArrayList<Issue> issueList = ProjectConstant.getManager().getIssues();
         int len = issueList.size();
-        String[][] values = new String[len][columns.length];
-        for (int i = 0; i > len; i++) values[i] = issueList.get(i).toString().split(" [|] ");
 
-        issueTable = new JTable(values, columns) {
-            private static final long serialVersionUID = 1L;
-
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        issueTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        JScrollPane scrollPane = new JScrollPane(issueTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        issues.add(scrollPane).setBounds(100, 54, 800, 388);
-
-        scrollPane.setViewportView(issueTable);
+        JTable table = new JTable(len, 7);
+        issues.add(setTable(table,issueList)).setBounds(100, 54, 800, 388);
 
         boolean isApproving = ProjectConstant.getManager().getCurrentUser().isApproving();
         boolean isDeveloper = ProjectConstant.getManager().getCurrentUser().isDeveloper();
-        boolean isAnalyst = ProjectConstant.getManager().getCurrentUser().isAnalyst();
-
-        if (isAnalyst) {
-            JButton edit = new JButton("Editar");
-            edit.addActionListener(arg0 -> {
-                // TODO open new window to edit issue
-            });
-            issues.add(edit).setBounds(430, 468, 100, 27);
-        }
-
-        int position = 459;
-        if (isAnalyst) position = 530;
-        else if (isApproving || isDeveloper) position = 430;
 
         JButton detail = new JButton("Detalhes");
         detail.addActionListener(arg0 -> {
-            // TODO open new window to detail issue
+            int row = table.getSelectedRow();
+            if (row > -1)
+                new DetailsDialog(
+                        new JFrame(),
+                        ProjectConstant.getManager().getIssues().get(row)
+                );
+            else JOptionPane.showMessageDialog(null,"Por Favor, selecione uma mudança", "", JOptionPane.WARNING_MESSAGE);
         });
-        issues.add(detail).setBounds(position, 468, 100, 27);
+        issues.add(detail).setBounds(isApproving || isDeveloper? 450 : 500, 468, 100, 27);
 
         if (isApproving) {
             JButton approve = new JButton("Avaliar");
             approve.addActionListener(arg0 -> {
-                // TODO open new window to approve/cancel issue
+                int row = table.getSelectedRow();
+                if (row > -1)
+                    new ApproveDialog(
+                            new JFrame(),
+                            ProjectConstant.getManager().getIssues().get(row)
+                    );
+                else JOptionPane.showMessageDialog(null,"Por Favor, selecione uma mudança", "", JOptionPane.WARNING_MESSAGE);
             });
-            issues.add(approve).setBounds(530, 468, 100, 27);
+            issues.add(approve).setBounds(550, 468, 100, 27);
         }
         if (isDeveloper){
             JButton implement = new JButton("Implementar");
             implement.addActionListener(arg0 -> {
                 // TODO change issue status to IssueStatus(2)
             });
-            issues.add(implement).setBounds(530, 468, 100, 27);
+            issues.add(implement).setBounds(550, 468, 120, 27);
         }
     }
 
@@ -162,13 +141,11 @@ public class SystemPanel extends JPanel {
         JTextArea descriptionField = new JTextArea();
         registerIssue.add(descriptionField).setBounds(233, 160, 438, 209);
 
-        startSoftwareSelectTable();
+        ArrayList<Software> softwareList = ProjectConstant.getManager().getSoftwares();
+        int len = softwareList.size();
 
-        JScrollPane scrollPane = new JScrollPane(softwareSelectTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        registerIssue.add(scrollPane).setBounds(700, 58, 250, 388);
-
-        scrollPane.setViewportView(softwareSelectTable);
+        JTable table = new JTable(len, 2);
+        registerIssue.add(setTable(table, softwareList, true)).setBounds(700, 58, 250, 388);
 
         JRadioButton release = new JRadioButton(IssueCategory.getCategory(2).name().replace('_', ' '), true);
         JRadioButton minor = new JRadioButton(IssueCategory.getCategory(1).name(), false);
@@ -230,7 +207,8 @@ public class SystemPanel extends JPanel {
                     nameField.getText(),
                     descriptionField.getText(),
                     category,
-                    calendar.getTime()
+                    calendar.getTime(),
+                    table.getSelectedRow()
             );
             calendar.setTime(new Date());
         });
@@ -274,7 +252,7 @@ public class SystemPanel extends JPanel {
         };
         softwareTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        JScrollPane scrollPane = new JScrollPane(issueTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        JScrollPane scrollPane = new JScrollPane(softwareTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         softwares.add(scrollPane).setBounds(200, 54, 600, 388);
 
@@ -282,8 +260,7 @@ public class SystemPanel extends JPanel {
 
         JButton deprecate = new JButton("Desativar");
         deprecate.addActionListener(arg0 ->{
-            int row = softwareSelectTable.getSelectedRow();
-            System.out.println(row);
+            System.out.println(softwareTable.getSelectedRow());
         });
         softwares.add(deprecate).setBounds(450, 450, 130, 29);
     }
@@ -318,7 +295,8 @@ public class SystemPanel extends JPanel {
             if (!nameText.equals("")) {
                 String versionText = versionField.getText();
                 if (versionText.equals("")) versionText = "1.0.0";
-                if (ProjectConstant.getManager().createSoftware(nameText, versionText.split("[.]"))) startSoftwareSelectTable();
+                if (ProjectConstant.getManager().createSoftware(nameText, versionText.split("[.]")))
+                    System.out.println("okay");
                 else JOptionPane.showMessageDialog(null, "Ocorreu um problema, tente mais tarde", "Conexão", JOptionPane.ERROR_MESSAGE);
             } else
                 JOptionPane.showMessageDialog(null, "Verifique se está preenchido o campo nome", "Dados inválidos", JOptionPane.WARNING_MESSAGE);
@@ -392,7 +370,7 @@ public class SystemPanel extends JPanel {
         registerUser.add(admin).setBounds(650, 240, 130, 27);
 
         JButton register = new JButton("Cadastrar");
-        register.setEnabled(false);
+        //register.setEnabled(false);
         register.addActionListener(arg0 ->{
             UserType type;
             if (developer.isSelected()) type = UserType.getType(0);
@@ -403,31 +381,88 @@ public class SystemPanel extends JPanel {
                     else type = UserType.getType(3);
                 }
             }
-            ProjectConstant.getManager();//.createUser();
+            try {
+                ProjectConstant.getManager().createUser(
+                        loginField.getText(),
+                        nameField.getText(),
+                        passwordField.getText(),
+                        passwordFieldConfirm.getText(),
+                        type
+                );
+            }catch (PasswordException e){
+                JOptionPane.showMessageDialog(null, "Usuário(login) já existente", "Já existe", JOptionPane.ERROR_MESSAGE);
+            } catch (InvalidParamsException e) {
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Campos vazios", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException e){
+                JOptionPane.showMessageDialog(null, e.getMessage(), "Senha inválida", JOptionPane.ERROR_MESSAGE);
+            }catch (ClassNotFoundException e){
+                JOptionPane.showMessageDialog(null, "Problemas na conexão com o banco", "Conexão", JOptionPane.ERROR_MESSAGE);
+            }
         });
         registerUser.add(register).setBounds(443, 399, 130, 29);
 	}
 
-    private void startSoftwareSelectTable() {
+    private JScrollPane setTable(JTable table, ArrayList<Issue> infos) {
+        JScrollPane scrollPane = new JScrollPane(setInfosIssue(table, infos), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setViewportView(table);
+        return scrollPane;
+    }
+
+    private JTable setInfosIssue(JTable table, ArrayList<Issue> infos){
+        String[] columns = {
+                "Nome",
+                "Status",
+                "Data de Criação",
+                "Aprovador",
+                "Software",
+                "Desenvolvedor",
+                "Prazo"
+        };
+        for (int i= 0; i < columns.length; i++) table.getColumnModel().getColumn(i).setHeaderValue(columns[i]);
+        if (!infos.isEmpty())
+            for (int i =0; i < infos.size(); i++){
+                Issue issue = infos.get(i);
+                String[] values = issue.toString().split(" [|] ");
+                table.setValueAt(values[0], i, 0);
+                table.setValueAt(values[1], i, 1);
+                table.setValueAt(values[2], i, 2);
+                table.setValueAt(values[3], i, 3);
+                table.setValueAt(values[4], i, 4);
+                table.setValueAt(values[5], i, 5);
+                table.setValueAt(values[6], i, 6);
+            }
+        return table;
+    }
+
+    private JScrollPane setTable(JTable table, ArrayList<Software> infos, boolean register){
+        JScrollPane scrollPane = new JScrollPane(setInfosSoftware(table, infos, register), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setViewportView(table);
+        return scrollPane;
+    }
+
+    private JTable setInfosSoftware(JTable table, ArrayList<Software> infos, boolean register){
         String[] columns = {
                 "Software",
+                "Vesion",
+                "Mudanças"
         };
-        List<Software> softwareList = ProjectConstant.getManager().getSoftwares();
-        int len = softwareList.size();
-        String[][] values = new String[len][1];
-        for (int i = 0; i < len; i++){
-            Software software = softwareList.get(i);
-            values[i] = new String[]{software.getName()};
+        for (int i = 0; i < 3; i ++){
+            if (register && i == 2) break;
+            table.getColumnModel().getColumn(i).setHeaderValue(columns[i]);
         }
-
-        softwareSelectTable = new JTable(values, columns) {
-            private static final long serialVersionUID = 1L;
-
-            public boolean isCellEditable(int row, int column) {
-                return false;
+        for (int i = 0; i < infos.size(); i++) {
+            Software software = infos.get(i);
+            String[] values = software.toString().split(" [|] ");
+            table.setValueAt(values[1], i, 0);
+            table.setValueAt(values[2], i, 1);
+            if (!register) {
+                try {
+                    table.setValueAt(IssueDAO.count(Long.parseLong(values[0])), i, 2);
+                } catch (SQLException | ClassNotFoundException e) {
+                    JOptionPane.showMessageDialog(null, "Erro de conexão", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
             }
-        };
-        softwareSelectTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        }
+        return table;
     }
 }
