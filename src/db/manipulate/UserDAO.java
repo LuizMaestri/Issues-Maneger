@@ -116,6 +116,7 @@ public class UserDAO{
         String sql = "SELECT nm_user, fl_user FROM users WHERE nm_login=?;";
         Connection connect = ProjectConstant.getConnector().getConnect();
         PreparedStatement stmt = connect.prepareStatement(sql);
+        stmt.setString(1, login);
         ResultSet result = stmt.executeQuery();
         if (result.next()){
             found = new User();

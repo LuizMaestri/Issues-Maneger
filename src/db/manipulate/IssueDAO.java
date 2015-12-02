@@ -16,7 +16,7 @@ public class IssueDAO {
     public static Issue create(Issue newIssue)
             throws SQLException, ClassNotFoundException {
         String sql =
-                "INSERT INTO issue " +
+                "INSERT INTO issues " +
                 "(nm_issue, de_issue, dt_deadline, nm_requester, fl_category, cd_software)" +
                 "VALUES(?, ?, ?, ?, ?, ?) " +
                 "RETURNING cd_issue, dt_create;";
@@ -129,9 +129,12 @@ public class IssueDAO {
             software.setDeprecate(false);
             issue.setSoftware(software);
 
-            issue.setRequester(UserDAO.find(result.getString("nm_requester")));
-            issue.setApproving(UserDAO.find(result.getString("nm_approving")));
-            issue.setMaker(UserDAO.find(result.getString("nm_maker")));
+            String s = result.getString("nm_requester");
+            String x = result.getString("nm_approving");
+            String a = result.getString("nm_maker");
+            issue.setRequester(UserDAO.find(s));
+            issue.setApproving(UserDAO.find(x));
+            issue.setMaker(UserDAO.find(a));
 
             issue.setComments(CommentDAO.list(id));
 
@@ -189,7 +192,7 @@ public class IssueDAO {
         return issues;
     }
 
-    public static int count(int softwareId)
+    public static int count(long softwareId)
             throws SQLException, ClassNotFoundException {
         String sql =
                 "SELECT count(cd_software) " +
@@ -197,7 +200,7 @@ public class IssueDAO {
                 "WHERE cd_software=? AND fl_status IN(3, 4);";
         Connection connect = ProjectConstant.getConnector().getConnect();
         PreparedStatement stmt = connect.prepareStatement(sql);
-        stmt.setInt(1, softwareId);
+        stmt.setLong(1, softwareId);
         ResultSet result = stmt.executeQuery();
         result.next();
         int count = result.getInt("count");
